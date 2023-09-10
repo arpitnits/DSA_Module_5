@@ -10,7 +10,12 @@ public class TreeModule {
         TreeAlgorithms treeAlgorithms = new TreeAlgorithms();
 
         List<Integer> path = new ArrayList<>();
-        treeAlgorithms.inOrder(root, path);
+        treeAlgorithms.levelOrder(root, path);
+        System.out.println(path);
+
+        treeAlgorithms.insertIntoBT(root, 22);
+        path = new ArrayList<>();
+        treeAlgorithms.levelOrder(root, path);
         System.out.println(path);
     }
 
