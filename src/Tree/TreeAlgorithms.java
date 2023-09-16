@@ -1,9 +1,7 @@
 package Tree;
 
 import javax.swing.tree.TreeNode;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class TreeAlgorithms {
 
@@ -244,6 +242,189 @@ public class TreeAlgorithms {
         int rightHeight = maxDepth(root.right);
 
         return Math.max(leftHeight, rightHeight) + 1;
+    }
+
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        Stack<TreeNode> s1 = new Stack<>(); //left->right
+        Stack<TreeNode> s2 = new Stack<>(); //right->left
+
+        List<List<Integer>> zigZagList = new ArrayList<>();
+        List<Integer> tempList;
+
+        if(root==null)
+            return zigZagList;
+
+        s1.push(root);
+
+        while(!s1.isEmpty() || !s2.isEmpty()) {
+
+            tempList = new ArrayList<>();
+            while (!s1.isEmpty()) {
+                TreeNode curr = s1.pop();
+                if(curr.left!=null)
+                    s2.push(curr.left);
+                if(curr.right!=null)
+                    s2.push(curr.right);
+
+                tempList.add(curr.data);
+            }
+
+            zigZagList.add(tempList);
+
+            while (!s2.isEmpty()) {
+                TreeNode curr = s2.pop();
+                if(curr.right!=null)
+                    s1.push(curr.right);
+                if(curr.left!=null)
+                    s1.push(curr.left);
+
+                tempList.add(curr.data);
+            }
+
+            zigZagList.add(tempList);
+        }
+        return zigZagList;
+    }
+
+    public boolean isBalanced(TreeNode root) {
+        int height = getHeightForBalanced(root);
+        if(height==-1)
+            return false;
+        return true;
+    }
+    private int getHeightForBalanced(TreeNode root) {
+        if(root==null)
+            return 0;
+
+        int leftHeight = getHeightForBalanced(root.left);
+        int rightHeight = getHeightForBalanced(root.right);
+
+        if(leftHeight == -1  || rightHeight == -1 ||
+                Math.abs(leftHeight-rightHeight) > 1)
+            return -1;
+
+        return Math.max(leftHeight, rightHeight) + 1;
+    }
+
+    private int diameter =0;
+    public int getHeightAndUpdateDiameter(TreeNode root) {
+
+        if(root==null)
+            return 0;
+
+        int leftHeight = getHeightAndUpdateDiameter(root.left);
+        int rightHeight = getHeightAndUpdateDiameter(root.right);
+
+        diameter = Math.max(diameter, leftHeight + rightHeight);
+
+        return Math.max(leftHeight, rightHeight) + 1;
+
+    }
+    public int diameterOfBinaryTree(TreeNode root) {
+        getHeightAndUpdateDiameter(root);
+        return diameter;
+    }
+    public int getLevel(TreeNode root, int data) {
+        if(root==null)
+            return 0;
+
+        Queue<TreeNode> q = new LinkedList<>();
+        q.add(root);
+        int level = 1;
+        while(!q.isEmpty()) {
+            int qSize = q.size();
+            for(int i=0;i<qSize;i++) {
+                TreeNode curr = q.remove();
+
+                if(curr.data == data)
+                    return level;
+
+                if(curr.left!=null) q.add(curr.left);
+                if(curr.right!=null)  q.add(curr.right);
+            }
+            level++;
+        }
+        return 0;
+    }
+
+    private void swapNode(TreeNode curr) {
+        TreeNode temp = curr.right;
+        curr.right = curr.left;
+        curr.left = temp;
+    }
+    public TreeNode invertTree(TreeNode root) {
+
+        if(root==null)
+            return null;
+
+        swapNode(root);
+        invertTree(root.left);
+        invertTree(root.right);
+
+        return root;
+    }
+
+    int maxcol =0, minCol =0;
+    public void buildTraversalMap(TreeNode root, int col, int row,
+                                  Map<Integer, TreeMap<Integer, List<Integer>>> verticalMap) {
+
+        if(root==null)
+            return;
+
+        if(!verticalMap.containsKey(col)) {
+            verticalMap.put(col, new TreeMap<>());
+        }
+
+        if(!verticalMap.get(col).containsKey(row)) {
+            verticalMap.get(col).put(row, new ArrayList<>());
+        }
+        verticalMap.get(col).get(row).add(root.data);
+
+        minCol = Math.min(minCol, col);
+        maxcol = Math.max(maxcol, col);
+
+        buildTraversalMap(root.left, col-1, row+1, verticalMap);
+        buildTraversalMap(root.right, col+1, row+1, verticalMap);
+    }
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        Map<Integer, TreeMap<Integer, List<Integer>>> verticalMap = new TreeMap<>();
+
+        //O(N)
+        buildTraversalMap(root, 0, 0, verticalMap);
+
+        List<List<Integer>> finalPath = new ArrayList<>();
+
+        //O(N*logN)
+        for(int i=minCol; i<=maxcol; i++) {
+            List<Integer> verticalPath = new ArrayList<>();
+            for(List<Integer> values :  verticalMap.get(i).values()) {
+                Collections.sort(values);
+                verticalPath.addAll(values);
+            }
+            finalPath.add(verticalPath);
+        }
+        return finalPath;
+    }
+
+    private int ans = Integer.MIN_VALUE;
+    private int maxPathSumUtil(TreeNode root) {
+        if(root==null)
+            return 0;
+
+        int leftMax = maxPathSumUtil(root.left);
+        int rightMax = maxPathSumUtil(root.right);
+
+        int currMax = Math.max(root.data, Math.max(leftMax, rightMax) + root.data);
+
+        ans = Math.max(ans, Math.max(currMax, leftMax + rightMax + root.data));
+
+        return currMax;
+    }
+
+    public int maxPathSum(TreeNode root) {
+        maxPathSumUtil(root);
+        return ans;
     }
 
 
