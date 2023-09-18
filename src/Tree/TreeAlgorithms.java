@@ -426,6 +426,131 @@ public class TreeAlgorithms {
         maxPathSumUtil(root);
         return ans;
     }
+    private boolean hasPath(TreeNode curr, int key, ArrayList<Integer> arrayList) {
+
+        if(curr==null)
+            return false;
+
+        if(curr.data == key) {
+            arrayList.add(curr.data);
+            return true;
+        }
+
+        arrayList.add(curr.data);
+
+        if(hasPath(curr.left, key, arrayList) || hasPath(curr.right, key, arrayList))
+            return true;
+
+        arrayList.remove(arrayList.size()-1);
+        return false;
+    }
+    public ArrayList<Integer> pathToNodeBT(TreeNode root, int key) {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        hasPath(root, key, arrayList);
+        return arrayList;
+    }
+
+    public TreeNode lowestCommonAncestorBST(TreeNode root, TreeNode p, TreeNode q) {
+        if(root==null)
+            return null;
+
+        if(p.data < root.data && q.data < root.data)
+            return lowestCommonAncestorBST(root.left, p, q);
+        else if(p.data > root.data && q.data>root.data)
+            return lowestCommonAncestorBST(root.right, p, q);
+
+        return root;
+    }
+
+    public TreeNode lowestCommonAncestorBT(TreeNode root, TreeNode p, TreeNode q) {
+        if(root==null)
+            return null;
+
+        if(root == p || root == q)
+            return root;
+
+        TreeNode left = lowestCommonAncestorBT(root.left, p, q);
+        TreeNode right = lowestCommonAncestorBT(root.right, p, q);
+
+        if(left!=null && right!=null)
+            return root;
+
+        if(left!=null)
+            return left;
+        else
+            return right;
+    }
+    public void flatten(TreeNode root) {
+        while(root!=null) {
+            if(root.left!=null) {
+                TreeNode curr = root;
+                TreeNode tempRight = curr.right;
+                curr.right = curr.left;
+                curr.left = null;
+                while(curr.right!=null)
+                    curr = curr.right;
+
+                curr.right = tempRight;
+            }
+            root = root.right;
+        }
+    }
+
+    int preIndex = 0;
+    public TreeNode buildTreeFromPreAndInOrderUtil(int[] preorder, int[] inorder,
+                                                   int inStart, int inEnd) {
+
+        if(inStart>inEnd)
+            return null;
+
+       TreeNode newNode = new TreeNode(preorder[preIndex++]);
+
+       if(inStart == inEnd)
+           return newNode;
+
+       int inOrderIndex = search(inorder, inStart, inEnd, newNode.data);
+
+       newNode.left = buildTreeFromPreAndInOrderUtil(preorder, inorder, inStart, inOrderIndex -1);
+       newNode.right = buildTreeFromPreAndInOrderUtil(preorder, inorder, inOrderIndex+1, inEnd);
+
+       return newNode;
+    }
+
+    private int search(int[] arr, int start, int end, int key) {
+        for(int i=start;i<=end;i++) {
+            if(key == arr[i])
+                return i;
+        }
+        return -1;
+    }
+    public TreeNode buildTreeFromPreAndInOrder(int[] preorder, int[] inorder) {
+        return  buildTreeFromPreAndInOrderUtil(preorder, inorder, 0, inorder.length-1);
+    }
+
+    private boolean isSiblings(TreeNode root, int x, int y) {
+        if(root==null)
+            return false;
+
+        if(root.left!=null && root.right!=null && (
+                (root.left.data==x && root.right.data==y) ||
+                        (root.right.data==x && root.left.data==y))) {
+            return true;
+        }
+
+        return ((isSiblings(root.left, x, y)) || (isSiblings(root.right, x, y)));
+    }
+    public boolean isCousins(TreeNode root, int x, int y) {
+        if(root==null)
+            return false;
+
+        int xLevel = getLevel(root, x);
+        int yLevel = getLevel(root, y);
+
+        if(xLevel==0 || yLevel==0)
+            return false;
+
+        return (xLevel==yLevel) && (!isSiblings(root, x, y));
+    }
 
 
 }
