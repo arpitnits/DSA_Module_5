@@ -70,5 +70,14 @@ public class MaxHeap {
         return arr;
     }
 
+    public void heapSort(int arr[], int n) {
+        buildMaxHeap(arr, n);
+
+        while(heapSize>0) {
+            swap(arr, 0, heapSize-1);
+            heapSize--;
+            topDownHeapify(arr, heapSize, 0);
+        }
+    }
 
 }
